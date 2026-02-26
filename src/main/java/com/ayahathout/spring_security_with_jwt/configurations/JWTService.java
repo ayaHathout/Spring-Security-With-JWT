@@ -2,7 +2,6 @@ package com.ayahathout.spring_security_with_jwt.configurations;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +40,7 @@ public class JWTService {
         return claimsResolver.apply(claims);
     }
 
-    // Extract the username, sub from the JWT
+    // Extract the username (sub) from the JWT
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
@@ -61,5 +60,23 @@ public class JWTService {
     // Generate JWT token without extra claims
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
+    }
+
+    // Extract the expiration data from the JWT
+    public Date getExpirationDateFromToken(String token) {
+        return getClaimFromToken(token, Claims::getExpiration);
+    }
+
+    // Check whether the token is expired
+    public Boolean isTokenExpired(String token) {
+        return getExpirationDateFromToken(token).before(new Date());
+    }
+
+    // Validate the JWT token
+    public Boolean isValidToken(String token, UserDetails userDetails) {
+        // Check whether the username sent the token is the same username of the current user
+        final String usernameInToken = getUsernameFromToken(token);
+        // The token is valid when the username sent the token is the same username of the current user && its expiration data is after the current date
+        return usernameInToken.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 }
