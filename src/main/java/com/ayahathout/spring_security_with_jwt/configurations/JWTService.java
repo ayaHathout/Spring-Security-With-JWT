@@ -1,5 +1,6 @@
 package com.ayahathout.spring_security_with_jwt.configurations;
 
+import com.ayahathout.spring_security_with_jwt.models.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -46,19 +47,19 @@ public class JWTService {
     }
 
     // Generate JWT token with extra claims
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    public String generateToken(Map<String, Object> extraClaims, User userDetails) {
         return Jwts
                 .builder()
-                .setExpiration(Date.from(Instant.now().plus(2, DurationFormat.Unit.DAYS.asChronoUnit())))
-                .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
+                .setSubject(userDetails.getEmail())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(Date.from(Instant.now().plus(2, DurationFormat.Unit.DAYS.asChronoUnit())))
                 .signWith(getSecretKey())
                 .compact();
     }
 
     // Generate JWT token without extra claims
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(User userDetails) {
         return generateToken(new HashMap<>(), userDetails);
     }
 
@@ -73,10 +74,14 @@ public class JWTService {
     }
 
     // Validate the JWT token
-    public Boolean isValidToken(String token, UserDetails userDetails) {
+    public Boolean isValidToken(String token, User userDetails) {
         // Check whether the username sent the token is the same username of the current user
         final String usernameInToken = getUsernameFromToken(token);
+
+        System.out.println("UsernameInToken: " + usernameInToken);
+        System.out.println("UsernameInUserDetails: " + userDetails.getEmail());
+
         // The token is valid when the username sent the token is the same username of the current user && its expiration data is after the current date
-        return usernameInToken.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        return usernameInToken.equals(userDetails.getEmail()) && !isTokenExpired(token);
     }
 }

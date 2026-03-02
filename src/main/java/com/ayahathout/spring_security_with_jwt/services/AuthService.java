@@ -4,6 +4,7 @@ import com.ayahathout.spring_security_with_jwt.configurations.JWTService;
 import com.ayahathout.spring_security_with_jwt.dtos.AuthenticationResponseDTO;
 import com.ayahathout.spring_security_with_jwt.dtos.LoginRequestDTO;
 import com.ayahathout.spring_security_with_jwt.dtos.RegisterationRequestDTO;
+import com.ayahathout.spring_security_with_jwt.enums.Role;
 import com.ayahathout.spring_security_with_jwt.models.User;
 import com.ayahathout.spring_security_with_jwt.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ public class AuthService {
                 .username(registerationRequestDTO.getUsername())
                 .firstName(registerationRequestDTO.getFirstName())
                 .lastName(registerationRequestDTO.getLastName())
+                .role(Role.USER)
                 .build();
 
         userRepository.save(userToBeRegistered);
@@ -49,7 +51,7 @@ public class AuthService {
     public AuthenticationResponseDTO login(LoginRequestDTO loginRequestDTO) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequestDTO.getEmail(), loginRequestDTO.getPassword()));
 
-        var userWantsToLogin = userRepository.findByEmail(loginRequestDTO.getEmail()).orElseThrow(() -> new UsernameNotFoundException(loginRequestDTO.getEmail()));
+        User userWantsToLogin = (User) userRepository.findByEmail(loginRequestDTO.getEmail()).orElseThrow(() -> new UsernameNotFoundException(loginRequestDTO.getEmail()));
 
         String token = jwtService.generateToken(userWantsToLogin);
         return AuthenticationResponseDTO

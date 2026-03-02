@@ -26,7 +26,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/auth")  // The white list ==> We do not pass the JWT into bearer during request
+                        .requestMatchers("/auth/**")  // The white list ==> We do not pass the JWT into bearer during request
                         .permitAll()
                         .anyRequest()// Any other endpoints, that are not in the white list, should be authenticated ==> I should pass the JWT into bearer during request
                         .authenticated())

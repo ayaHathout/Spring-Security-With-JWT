@@ -20,12 +20,16 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterationRequestDTO registerationRequestDTO) {
+        System.out.println("In register method in AuthController");
+
         AuthenticationResponseDTO authenticationResponseDTO = authService.register(registerationRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(authenticationResponseDTO);
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequestDTO) {
+        System.out.println("In login method in AuthController");
+
         AuthenticationResponseDTO authenticationResponseDTO = authService.login(loginRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(authenticationResponseDTO);
     }
