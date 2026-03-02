@@ -2,10 +2,14 @@ package com.ayahathout.spring_security_with_jwt.services;
 
 import com.ayahathout.spring_security_with_jwt.configurations.JWTService;
 import com.ayahathout.spring_security_with_jwt.dtos.AuthenticationResponseDTO;
+import com.ayahathout.spring_security_with_jwt.dtos.LoginRequestDTO;
 import com.ayahathout.spring_security_with_jwt.dtos.RegisterationRequestDTO;
 import com.ayahathout.spring_security_with_jwt.models.User;
 import com.ayahathout.spring_security_with_jwt.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +24,9 @@ public class AuthService {
     @Autowired
     private JWTService jwtService;
 
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
     public AuthenticationResponseDTO register(RegisterationRequestDTO registerationRequestDTO) {
         User userToBeRegistered = User
                 .builder()
@@ -33,6 +40,18 @@ public class AuthService {
         userRepository.save(userToBeRegistered);
 
         String token = jwtService.generateToken(userToBeRegistered);
+        return AuthenticationResponseDTO
+                .builder()
+                .token(token)
+                .build();
+    }
+
+    public AuthenticationResponseDTO login(LoginRequestDTO loginRequestDTO) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequestDTO.getEmail(), loginRequestDTO.getPassword()));
+
+        var userWantsToLogin = userRepository.findByEmail(loginRequestDTO.getEmail()).orElseThrow(() -> new UsernameNotFoundException(loginRequestDTO.getEmail()));
+
+        String token = jwtService.generateToken(userWantsToLogin);
         return AuthenticationResponseDTO
                 .builder()
                 .token(token)
